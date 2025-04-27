@@ -1,16 +1,138 @@
 <!DOCTYPE html>
-
-<html>
-
+<html lang="en">
 <head>
-	<link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tic Tac Toe</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
+    .container { max-width: 400px; margin: 50px auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); text-align: center; }
+    #game { display: none; }
+    .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 20px; }
+    .cell {
+      width: 100px;
+      height: 100px;
+      border: 2px solid #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .cell:hover { background: #eef; }
+    .message { margin-top: 15px; font-size: 1.2rem; min-height: 1.4em; }
+    input { padding: 8px; width: calc(100% - 20px); margin: 5px 0; }
+    button { padding: 10px 20px; margin-top: 10px; font-size: 1rem; cursor: pointer; }
+    #reset { display: none; margin-top: 15px; }
+  </style>
 </head>
-
 <body>
-	<!-- the entire body must be written by student -->
-    <script type="text/javascript" src="./script.js">
-</script>
+  <div class="container">
+    <div id="setup">
+      <h1>Tic Tac Toe</h1>
+      <input type="text" id="player-1" placeholder="Player 1 Name" required>
+      <input type="text" id="player-2" placeholder="Player 2 Name" required>
+      <button id="submit">Start Game</button>
+    </div>
+    <div id="game">
+      <h1>Tic Tac Toe</h1>
+      <div class="message" id="message"></div>
+      <div class="board">
+        <div class="cell" id="1"></div>
+        <div class="cell" id="2"></div>
+        <div class="cell" id="3"></div>
+        <div class="cell" id="4"></div>
+        <div class="cell" id="5"></div>
+        <div class="cell" id="6"></div>
+        <div class="cell" id="7"></div>
+        <div class="cell" id="8"></div>
+        <div class="cell" id="9"></div>
+      </div>
+      <button id="reset">Restart Game</button>
+    </div>
+  </div>
+  <script>
+    const setupDiv = document.getElementById('setup');
+    const gameDiv = document.getElementById('game');
+    const submitBtn = document.getElementById('submit');
+    const resetBtn = document.getElementById('reset');
+    const messageDiv = document.getElementById('message');
+    const cells = Array.from(document.querySelectorAll('.cell'));
 
+    let players = {}; // { X: name1, O: name2 }
+    let currentPlayer = 'X';
+    let board = Array(9).fill(null);
+    let gameActive = false;
+
+    submitBtn.addEventListener('click', () => {
+      const p1 = document.getElementById('player-1').value.trim();
+      const p2 = document.getElementById('player-2').value.trim();
+      if (!p1 || !p2) {
+        alert('Please enter both player names.');
+        return;
+      }
+      players.X = p1;
+      players.O = p2;
+      setupDiv.style.display = 'none';
+      gameDiv.style.display = 'block';
+      gameActive = true;
+      messageDiv.textContent = `${players.X}, you're up.`;
+    });
+
+    const winningCombos = [
+      [0,1,2], [3,4,5], [6,7,8],
+      [0,3,6], [1,4,7], [2,5,8],
+      [0,4,8], [2,4,6]
+    ];
+
+    function checkWin() {
+      return winningCombos.some(combo => {
+        const [a, b, c] = combo;
+        return board[a] && board[a] === board[b] && board[a] === board[c];
+      });
+    }
+
+    function checkDraw() {
+      return board.every(cell => cell !== null);
+    }
+
+    function handleCellClick(e) {
+      const idx = parseInt(e.target.id) - 1;
+      if (!gameActive || board[idx]) return;
+      board[idx] = currentPlayer;
+      e.target.textContent = currentPlayer;
+
+      if (checkWin()) {
+        gameActive = false;
+        messageDiv.textContent = `${players[currentPlayer]}, congratulations you won!`;
+        resetBtn.style.display = 'inline-block';
+        return;
+      }
+
+      if (checkDraw()) {
+        gameActive = false;
+        messageDiv.textContent = "It's a draw!";
+        resetBtn.style.display = 'inline-block';
+        return;
+      }
+
+      // switch player
+      currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+      messageDiv.textContent = `${players[currentPlayer]}, you're up.`;
+    }
+
+    cells.forEach(cell => cell.addEventListener('click', handleCellClick));
+
+    resetBtn.addEventListener('click', () => {
+      board.fill(null);
+      cells.forEach(cell => cell.textContent = '');
+      currentPlayer = 'X';
+      gameActive = true;
+      messageDiv.textContent = `${players.X}, you're up.`;
+      resetBtn.style.display = 'none';
+    });
+  </script>
 </body>
-
 </html>
